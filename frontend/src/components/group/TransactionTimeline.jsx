@@ -63,12 +63,12 @@ export default function TransactionTimeline({
   });
 
   return (
-    <div className="glass-card rounded-3xl p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card space-y-5 animate-in fade-in duration-150">
+    <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card space-y-4 sm:space-y-5 animate-in fade-in duration-150">
       {/* Timeline Header & Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-zinc-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-          <h4 className="text-base font-bold text-slate-900 dark:text-zinc-100">
+          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-100">
             Bảng sao kê lịch sử giao dịch
           </h4>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
@@ -77,10 +77,10 @@ export default function TransactionTimeline({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs overflow-x-auto w-full sm:w-auto no-scrollbar">
           <button
             onClick={() => setFilterType('ALL')}
-            className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
               filterType === 'ALL'
                 ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -90,7 +90,7 @@ export default function TransactionTimeline({
           </button>
           <button
             onClick={() => setFilterType('EXPENSE')}
-            className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
               filterType === 'EXPENSE'
                 ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -100,7 +100,7 @@ export default function TransactionTimeline({
           </button>
           <button
             onClick={() => setFilterType('SETTLEMENT')}
-            className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
               filterType === 'SETTLEMENT'
                 ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -130,7 +130,7 @@ export default function TransactionTimeline({
               <div
                 key={item._id}
                 onClick={() => isExpense && toggleExpand(item._id)}
-                className={`p-4 rounded-2xl border transition-all duration-200 ${
+                className={`p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 ${
                   isExpense
                     ? 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:shadow-sm cursor-pointer'
                     : item.status === 'CONFIRMED'
@@ -140,11 +140,11 @@ export default function TransactionTimeline({
                     : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200/70 dark:border-amber-800/50'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
+                <div className="flex items-start justify-between gap-2.5 sm:gap-3">
+                  <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
                     {/* Badge Icon */}
                     <div
-                      className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
                         isExpense
                           ? 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
                           : item.status === 'CONFIRMED'
@@ -155,20 +155,20 @@ export default function TransactionTimeline({
                       }`}
                     >
                       {isExpense ? (
-                        <Receipt className="w-5 h-5" />
+                        <Receipt className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : item.status === 'CONFIRMED' ? (
-                        <CheckCircle2 className="w-5 h-5" />
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : item.status === 'REJECTED' ? (
-                        <XCircle className="w-5 h-5" />
+                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : (
-                        <Clock className="w-5 h-5" />
+                        <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                       )}
                     </div>
 
                     {/* Content Details */}
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h5 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <h5 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-zinc-100 truncate max-w-[140px] sm:max-w-xs">
                           {item.title}
                         </h5>
 
@@ -226,10 +226,10 @@ export default function TransactionTimeline({
                   </div>
 
                   {/* Right side: Amount & Expand/Delete */}
-                  <div className="flex items-center gap-3 text-right">
+                  <div className="flex items-center gap-2 sm:gap-3 text-right flex-shrink-0">
                     <div>
                       <span
-                        className={`text-base font-extrabold num-vnd block ${
+                        className={`text-xs sm:text-base font-extrabold num-vnd block ${
                           isExpense
                             ? 'text-slate-900 dark:text-zinc-100'
                             : item.status === 'CONFIRMED'
@@ -248,11 +248,11 @@ export default function TransactionTimeline({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       {isExpense && (
                         <button
                           type="button"
-                          className="p-1 rounded-lg text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 cursor-pointer"
+                          className="p-1.5 sm:p-1 rounded-lg text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                         >
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4" />
@@ -268,7 +268,7 @@ export default function TransactionTimeline({
                           disabled={deletingId === item._id}
                           onClick={(e) => handleDelete(item, e)}
                           title="Xóa giao dịch"
-                          className="p-1 rounded-lg text-slate-400 dark:text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                          className="p-1.5 sm:p-1 rounded-lg text-slate-400 dark:text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

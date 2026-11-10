@@ -274,42 +274,45 @@ export default function AddExpenseModal({
   const firstUserObj = group.members.find((m) => m.user._id === firstUserId)?.user;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-150">
       <div
-        className="glass-modal w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative my-8 animate-in zoom-in-95 duration-200"
+        className="glass-modal w-full max-w-2xl rounded-t-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl p-5 sm:p-8 shadow-2xl relative my-0 sm:my-8 max-h-[92vh] sm:max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Indicator Bar */}
+        <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
-            <Receipt className="w-6 h-6" />
+        <div className="flex items-center gap-3 mb-5 sm:mb-6 pr-8 sm:pr-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center flex-shrink-0">
+            <Receipt className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-zinc-100">Thêm khoản chi tiêu mới</h3>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-zinc-100">Thêm khoản chi tiêu mới</h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 truncate max-w-[240px] sm:max-w-none">
               Phòng: <strong className="text-slate-700 dark:text-zinc-300">{group.name}</strong> • Khớp làm tròn số nguyên tuyệt đối
             </p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+          <div className="mb-5 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Row 1: Tên khoản chi & Số tiền */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <Input
               label="Tên khoản chi"
               id="title"
@@ -351,16 +354,16 @@ export default function AddExpenseModal({
 
           {/* Row 2: Danh mục (Pill selector) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5 sm:mb-2">
               Danh mục chi tiêu
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer min-h-[36px] flex items-center justify-center ${
                     category === cat
                       ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300 dark:ring-emerald-700 ring-offset-1 dark:ring-offset-zinc-900'
                       : 'bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300'
@@ -373,7 +376,7 @@ export default function AddExpenseModal({
           </div>
 
           {/* Row 3: Người thanh toán & Ngày */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                 Người trả tiền trước <span className="text-rose-500 dark:text-rose-400">*</span>
@@ -412,12 +415,12 @@ export default function AddExpenseModal({
                 <span>Phương thức chia tiền</span>
               </label>
 
-              {/* Mode Switcher Tabs */}
-              <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs">
+              {/* Mode Switcher Tabs (with min-h-[44px] for mobile friendly touch) */}
+              <div className="grid grid-cols-3 sm:flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs">
                 <button
                   type="button"
                   onClick={() => setSplitType('EQUAL')}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`min-h-[44px] sm:min-h-[34px] px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center ${
                     splitType === 'EQUAL'
                       ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                       : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -428,7 +431,7 @@ export default function AddExpenseModal({
                 <button
                   type="button"
                   onClick={() => setSplitType('PERCENTAGE')}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`min-h-[44px] sm:min-h-[34px] px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center ${
                     splitType === 'PERCENTAGE'
                       ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                       : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -439,7 +442,7 @@ export default function AddExpenseModal({
                 <button
                   type="button"
                   onClick={() => setSplitType('EXACT')}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`min-h-[44px] sm:min-h-[34px] px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center ${
                     splitType === 'EXACT'
                       ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                       : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -452,7 +455,7 @@ export default function AddExpenseModal({
 
             {/* BỘ ĐẾM SỐ TIỀN / PHẦN TRĂM THỜI GIAN THỰC (REAL-TIME SMART COUNTER) */}
             <div className="mb-3 p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-zinc-800/60 border-slate-200 dark:border-zinc-700">
-              <span className="text-slate-600 dark:text-zinc-400 font-medium">Trạng thái khớp phân bổ:</span>
+              <span className="text-slate-600 dark:text-zinc-400 font-medium">Trạng thái khớp:</span>
 
               <div className="flex items-center gap-2">
                 {splitValidationStatus === 'VALID' ? (
@@ -480,9 +483,9 @@ export default function AddExpenseModal({
 
             {/* Split Content: EQUAL */}
             {splitType === 'EQUAL' && (
-              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
+              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
-                  <span>Tích chọn những người tham gia chia khoản này:</span>
+                  <span>Tích chọn những người tham gia chia:</span>
                   <span className="font-bold text-slate-700 dark:text-zinc-300">
                     Đã chọn {selectedUserIds.length}/{group.members?.length} người
                   </span>
@@ -496,15 +499,15 @@ export default function AddExpenseModal({
                       <div
                         key={m.user._id}
                         onClick={() => toggleUserEqual(m.user._id)}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                        className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer min-h-[44px] ${
                           isSelected
                             ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200'
                             : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-zinc-600'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           <div
-                            className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
+                            className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all flex-shrink-0 ${
                               isSelected
                                 ? 'bg-emerald-600 border-emerald-600 text-white'
                                 : 'border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-800'
@@ -515,14 +518,14 @@ export default function AddExpenseModal({
                           <img
                             src={m.user.avatar}
                             alt=""
-                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800"
+                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex-shrink-0"
                           />
-                          <span className="text-xs font-semibold truncate max-w-[120px] text-slate-800 dark:text-zinc-200">
+                          <span className="text-xs font-semibold truncate text-slate-800 dark:text-zinc-200">
                             {m.user.name}
                           </span>
                         </div>
                         {isSelected && parsedAmount > 0 && (
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0 pl-2">
                             <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 num-vnd block">
                               {formatVND(previewItem?.amountOwed || 0)}
                             </span>
@@ -552,9 +555,9 @@ export default function AddExpenseModal({
 
             {/* Split Content: PERCENTAGE */}
             {splitType === 'PERCENTAGE' && (
-              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
+              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-zinc-400">Nhập tỷ lệ % cho từng thành viên:</span>
+                  <span className="text-slate-500 dark:text-zinc-400">Nhập tỷ lệ % từng người:</span>
                   <span
                     className={`font-bold ${
                       Math.abs(totalPercentage - 100) < 0.001
@@ -575,19 +578,19 @@ export default function AddExpenseModal({
                     return (
                       <div
                         key={m.user._id}
-                        className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-700"
+                        className="flex items-center justify-between gap-2.5 p-2 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-700"
                       >
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                           <img
                             src={m.user.avatar}
                             alt=""
-                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800"
+                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex-shrink-0"
                           />
                           <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 truncate">
                             {m.user.name}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {parsedAmount > 0 && (
                             <div className="text-right">
                               <span className="text-xs font-bold text-slate-700 dark:text-zinc-300 num-vnd block">
@@ -639,9 +642,9 @@ export default function AddExpenseModal({
 
             {/* Split Content: EXACT */}
             {splitType === 'EXACT' && (
-              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
+              <div className="space-y-3 bg-slate-50/70 dark:bg-zinc-800/40 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/60">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-zinc-400">Nhập số tiền chính xác từng người chịu:</span>
+                  <span className="text-slate-500 dark:text-zinc-400">Nhập số tiền chính xác từng người:</span>
                   <span
                     className={`font-bold num-vnd ${
                       totalExact === parsedAmount && parsedAmount > 0
@@ -651,7 +654,7 @@ export default function AddExpenseModal({
                         : 'text-rose-600 dark:text-rose-400'
                     }`}
                   >
-                    Đã phân bổ: {formatVND(totalExact)} / {formatVND(parsedAmount)}
+                    Đã chia: {formatVND(totalExact)} / {formatVND(parsedAmount)}
                   </span>
                 </div>
 
@@ -661,19 +664,19 @@ export default function AddExpenseModal({
                     return (
                       <div
                         key={m.user._id}
-                        className="flex items-center justify-between gap-3 p-2 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-700"
+                        className="flex items-center justify-between gap-2.5 p-2 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-700"
                       >
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                           <img
                             src={m.user.avatar}
                             alt=""
-                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800"
+                            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex-shrink-0"
                           />
                           <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 truncate">
                             {m.user.name}
                           </span>
                         </div>
-                        <div className="relative w-36">
+                        <div className="relative w-32 sm:w-36 flex-shrink-0">
                           <input
                             type="number"
                             min="0"
@@ -686,7 +689,7 @@ export default function AddExpenseModal({
                                 [m.user._id]: e.target.value === '' ? '' : Math.round(Number(e.target.value))
                               })
                             }
-                            className="w-full text-right text-base sm:text-xs font-bold py-1.5 pl-2 pr-8 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-950/60 focus:border-emerald-500 num-vnd"
+                            className="w-full text-right text-base sm:text-xs font-bold py-1.5 pl-2 pr-7 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-950/60 focus:border-emerald-500 num-vnd"
                           />
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 dark:text-zinc-500 font-bold pointer-events-none">
                             ₫
@@ -701,7 +704,7 @@ export default function AddExpenseModal({
           </div>
 
           {/* Form Actions with Strict Unlocking */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-slate-100 dark:border-zinc-800">
             <div className="text-xs text-slate-500 dark:text-zinc-400">
               {!isSplitValid && parsedAmount > 0 && (
                 <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
@@ -711,12 +714,13 @@ export default function AddExpenseModal({
               )}
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <div className="grid grid-cols-2 sm:flex items-center gap-2.5 sm:gap-3">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={onClose}
                 disabled={loading}
+                className="min-h-[44px]"
               >
                 Hủy
               </Button>
@@ -726,7 +730,7 @@ export default function AddExpenseModal({
                 loading={loading}
                 disabled={!isFormValid || loading}
                 title={!isFormValid ? 'Vui lòng khớp 100% số tiền để tiếp tục' : 'Tạo khoản chi'}
-                className={!isFormValid ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+                className={`min-h-[44px] ${!isFormValid ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
               >
                 Thêm khoản chi
               </Button>

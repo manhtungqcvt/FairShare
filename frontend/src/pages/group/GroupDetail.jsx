@@ -127,12 +127,12 @@ export default function GroupDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 flex flex-col transition-colors duration-200">
+      <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-zinc-950 flex flex-col transition-colors duration-200">
         <Navbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
           <div className="h-6 w-32 bg-slate-200 dark:bg-zinc-800 rounded-md animate-pulse" />
-          <div className="glass-card rounded-3xl p-8 h-40 bg-slate-100 dark:bg-zinc-900 animate-pulse" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 h-40 bg-slate-100 dark:bg-zinc-900 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[1, 2, 3].map((n) => (
               <div key={n} className="glass-card rounded-3xl p-6 h-48 bg-slate-100 dark:bg-zinc-900 animate-pulse" />
             ))}
@@ -154,28 +154,28 @@ export default function GroupDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col selection:bg-emerald-500 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col selection:bg-emerald-500 selection:text-white transition-colors duration-200 pb-24 sm:pb-8">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-7">
         {/* Navigation Breadcrumb & Action bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors cursor-pointer truncate"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Bảng điều khiển</span>
+            <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Quay lại Bảng điều khiển</span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <button
               onClick={() => fetchGroupData(true)}
               disabled={refreshing}
               className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-              <span>Đồng bộ</span>
+              <span className="hidden sm:inline">Đồng bộ</span>
             </button>
 
             {/* Nút Rời phòng (áp dụng Member Exit Lock) */}
@@ -202,13 +202,13 @@ export default function GroupDetail() {
         )}
 
         {/* Group Header Banner */}
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="glass-card rounded-3xl p-5 sm:p-8 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden">
           {/* Decorative accent background glow */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-emerald-100/40 via-teal-100/20 to-transparent dark:from-emerald-950/30 dark:via-teal-950/10 dark:to-transparent rounded-full blur-2xl pointer-events-none" />
 
-          <div className="space-y-3 z-10">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">
+          <div className="space-y-3 z-10 w-full lg:w-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight truncate max-w-full">
                 {group.name}
               </h1>
 
@@ -217,14 +217,14 @@ export default function GroupDetail() {
                 type="button"
                 onClick={handleCopyCode}
                 title="Bấm để sao chép mã mời"
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-mono font-bold tracking-wider transition-all cursor-pointer shadow-sm active:scale-95"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-mono font-bold tracking-wider transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 <Share2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>MÃ: {group.inviteCode}</span>
                 {copied ? (
-                  <span className="flex items-center gap-1 text-[11px] font-sans font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-lg shadow-xs">
+                  <span className="flex items-center gap-1 text-[11px] font-sans font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-zinc-800 px-1.5 py-0.5 rounded-lg shadow-xs">
                     <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                    Đã sao chép!
+                    Đã chép!
                   </span>
                 ) : (
                   <Copy className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -233,7 +233,7 @@ export default function GroupDetail() {
             </div>
 
             {group.description && (
-              <p className="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl">{group.description}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-2xl">{group.description}</p>
             )}
 
             {/* Member Stack & Management Chips */}
@@ -245,7 +245,7 @@ export default function GroupDetail() {
                     src={m.user.avatar}
                     alt={m.user.name}
                     title={`${m.user.name} (${m.role === 'ADMIN' ? 'Trưởng phòng' : 'Thành viên'})`}
-                    className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-zinc-900 object-cover bg-slate-100 dark:bg-zinc-800"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-white dark:ring-zinc-900 object-cover bg-slate-100 dark:bg-zinc-800"
                   />
                 ))}
               </div>
@@ -257,9 +257,9 @@ export default function GroupDetail() {
                   return (
                     <span
                       key={m.user._id}
-                      className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-medium border border-slate-200 dark:border-zinc-700"
+                      className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-medium border border-slate-200 dark:border-zinc-700 max-w-[150px] sm:max-w-none truncate"
                     >
-                      <span>{m.user.name}</span>
+                      <span className="truncate">{m.user.name}</span>
                       {m.role === 'ADMIN' && (
                         <span className="text-[10px] px-1 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold">
                           Admin
@@ -282,14 +282,14 @@ export default function GroupDetail() {
             </div>
           </div>
 
-          {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 z-10 flex-shrink-0">
+          {/* Desktop/Tablet Action CTAs (Hidden on mobile because of Sticky Bottom Bar) */}
+          <div className="hidden sm:flex flex-row items-center gap-3 z-10 flex-shrink-0">
             <Button
               variant="outline"
               icon={HandCoins}
               size="lg"
               onClick={() => handleOpenSettleWithPrefill()}
-              className="bg-white dark:bg-zinc-900 dark:border-zinc-700"
+              className="bg-white dark:bg-zinc-900 dark:border-zinc-700 min-h-[44px]"
             >
               Trả tiền ngay (Settle Up)
             </Button>
@@ -298,6 +298,7 @@ export default function GroupDetail() {
               icon={PlusCircle}
               size="lg"
               onClick={() => setExpenseModalOpen(true)}
+              className="min-h-[44px]"
             >
               Thêm khoản chi
             </Button>
@@ -315,12 +316,12 @@ export default function GroupDetail() {
 
         {/* NAVIGATION TABS: BẢNG SAO KÊ vs NHẬT KÝ HOẠT ĐỘNG */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-2 overflow-x-auto">
+            <div className="flex items-center gap-2 min-w-max">
               <button
                 type="button"
                 onClick={() => setActiveTab('TIMELINE')}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[40px] sm:min-h-[44px] ${
                   activeTab === 'TIMELINE'
                     ? 'bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
                     : 'bg-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800'
@@ -342,14 +343,14 @@ export default function GroupDetail() {
               <button
                 type="button"
                 onClick={() => setActiveTab('ACTIVITIES')}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[40px] sm:min-h-[44px] ${
                   activeTab === 'ACTIVITIES'
                     ? 'bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
                     : 'bg-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 <History className="w-4 h-4" />
-                <span>Nhật ký hoạt động (Audit Log)</span>
+                <span>Nhật ký hoạt động</span>
               </button>
             </div>
           </div>
@@ -370,6 +371,26 @@ export default function GroupDetail() {
           )}
         </div>
       </main>
+
+      {/* MOBILE STICKY BOTTOM ACTION BAR (HẠNG MỤC 2: THANH THAO TÁC NHANH Ở ĐÁY MÀN HÌNH) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800 p-2.5 sm:p-3 flex items-center gap-2.5 shadow-xl safe-area-pb">
+        <button
+          type="button"
+          onClick={() => handleOpenSettleWithPrefill()}
+          className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer"
+        >
+          <HandCoins className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <span>Trả tiền</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setExpenseModalOpen(true)}
+          className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition-transform cursor-pointer"
+        >
+          <PlusCircle className="w-4 h-4" />
+          <span>+ Thêm khoản chi</span>
+        </button>
+      </div>
 
       {/* Modal Thêm Khoản Chi */}
       <AddExpenseModal

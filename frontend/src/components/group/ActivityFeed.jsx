@@ -102,12 +102,12 @@ export default function ActivityFeed({ groupId }) {
   });
 
   return (
-    <div className="glass-card rounded-3xl p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card space-y-5 animate-in fade-in duration-150">
+    <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card space-y-4 sm:space-y-5 animate-in fade-in duration-150">
       {/* Header & Filter Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-zinc-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-          <h4 className="text-base font-bold text-slate-900 dark:text-zinc-100">
+          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-100">
             Nhật ký hoạt động & Lịch sử chỉnh sửa
           </h4>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
@@ -115,12 +115,12 @@ export default function ActivityFeed({ groupId }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {/* Action Filter Pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs overflow-x-auto no-scrollbar flex-1 sm:flex-initial">
             <button
               onClick={() => setFilterAction('ALL')}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
                 filterAction === 'ALL'
                   ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -130,7 +130,7 @@ export default function ActivityFeed({ groupId }) {
             </button>
             <button
               onClick={() => setFilterAction('EXPENSE')}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
                 filterAction === 'EXPENSE'
                   ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -140,7 +140,7 @@ export default function ActivityFeed({ groupId }) {
             </button>
             <button
               onClick={() => setFilterAction('SETTLEMENT')}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
                 filterAction === 'SETTLEMENT'
                   ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -150,7 +150,7 @@ export default function ActivityFeed({ groupId }) {
             </button>
             <button
               onClick={() => setFilterAction('MEMBER')}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-[36px] rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial text-center ${
                 filterAction === 'MEMBER'
                   ? 'bg-white dark:bg-zinc-700 text-emerald-700 dark:text-emerald-300 shadow-sm'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -164,7 +164,7 @@ export default function ActivityFeed({ groupId }) {
             onClick={fetchActivities}
             disabled={loading}
             title="Làm mới nhật ký"
-            className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+            className="p-2 sm:p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center flex-shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>

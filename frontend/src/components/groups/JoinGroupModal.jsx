@@ -45,24 +45,30 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={onClose}
+    >
       <div
-        className="glass-modal w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl relative animate-in zoom-in-95 duration-200"
+        className="glass-modal w-full max-w-md rounded-t-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl p-5 sm:p-7 shadow-2xl relative max-h-[92vh] sm:max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile drag handle */}
+        <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
+
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-2 sm:p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center">
-            <KeyRound className="w-6 h-6" />
+        <div className="flex items-center gap-3 mb-5 sm:mb-6 pr-8">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center flex-shrink-0">
+            <KeyRound className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Nhập mã mời phòng</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-zinc-100">Nhập mã mời phòng</h3>
             <p className="text-xs text-slate-500 dark:text-zinc-400">Mã 6 ký tự do trưởng phòng hoặc bạn cùng phòng chia sẻ</p>
           </div>
         </div>
@@ -99,12 +105,13 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
             <span>Bạn sẽ ngay lập tức xem được công nợ và lịch sử chi tiêu sau khi tham gia.</span>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-3">
             <Button
               type="button"
               variant="secondary"
               onClick={onClose}
               disabled={loading}
+              className="w-full sm:w-auto min-h-[44px]"
             >
               Hủy
             </Button>
@@ -114,6 +121,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
               loading={loading}
               disabled={inviteCode.length < 6}
               icon={ArrowRight}
+              className="w-full sm:w-auto min-h-[44px]"
             >
               Tham gia ngay
             </Button>

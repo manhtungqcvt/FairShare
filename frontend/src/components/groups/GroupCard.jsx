@@ -21,7 +21,7 @@ export default function GroupCard({ group }) {
   return (
     <div
       onClick={() => navigate(`/groups/${group._id}`)}
-      className="glass-card rounded-3xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover border border-slate-200/90 dark:border-zinc-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+      className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover border border-slate-200/90 dark:border-zinc-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
     >
       {/* Decorative top accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-80 group-hover:opacity-100 transition-opacity" />

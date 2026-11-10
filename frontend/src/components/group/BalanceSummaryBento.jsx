@@ -40,7 +40,7 @@ export default function BalanceSummaryBento({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* CARD 1: Trạng thái cá nhân (Bento Card nổi bật) */}
         <div
-          className={`rounded-3xl p-6 transition-all duration-200 border shadow-card flex flex-col justify-between ${
+          className={`rounded-2xl sm:rounded-3xl p-5 sm:p-6 transition-all duration-200 border shadow-card flex flex-col justify-between ${
             isPositive
               ? 'bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white dark:from-emerald-950/40 dark:via-teal-950/20 dark:to-zinc-900 border-emerald-200 dark:border-emerald-800/60'
               : isNegative
@@ -86,7 +86,7 @@ export default function BalanceSummaryBento({
             </p>
 
             <h3
-              className={`text-3xl font-extrabold mt-2 num-vnd tracking-tight ${
+              className={`text-2xl sm:text-3xl font-extrabold mt-2 num-vnd tracking-tight ${
                 isPositive
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : isNegative
@@ -107,7 +107,7 @@ export default function BalanceSummaryBento({
                 fullWidth
                 icon={HandCoins}
                 onClick={() => onOpenSettleUp()}
-                className="shadow-sm hover:shadow"
+                className="shadow-sm hover:shadow min-h-[44px]"
               >
                 Trả tiền ngay (Settle Up)
               </Button>
@@ -118,6 +118,7 @@ export default function BalanceSummaryBento({
                 fullWidth
                 icon={HandCoins}
                 onClick={() => onOpenSettleUp()}
+                className="min-h-[44px]"
               >
                 Ghi nhận thanh toán
               </Button>
@@ -126,7 +127,7 @@ export default function BalanceSummaryBento({
         </div>
 
         {/* CARD 2: Tổng chi tiêu phòng & Trung bình */}
-        <div className="glass-card rounded-3xl p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col justify-between">
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
@@ -136,7 +137,7 @@ export default function BalanceSummaryBento({
               <span className="text-xs text-slate-400 dark:text-zinc-500 font-medium">Toàn thời gian</span>
             </div>
 
-            <h3 className="text-3xl font-extrabold text-slate-900 dark:text-zinc-100 num-vnd tracking-tight">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 num-vnd tracking-tight">
               {formatVND(totalGroupExpense)}
             </h3>
 
@@ -161,7 +162,7 @@ export default function BalanceSummaryBento({
         </div>
 
         {/* CARD 3: Giao dịch tối giản hoá (Debt Simplification) */}
-        <div className="glass-card rounded-3xl p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col justify-between md:col-span-2 lg:col-span-1">
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card flex flex-col justify-between md:col-span-2 lg:col-span-1">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
@@ -213,7 +214,7 @@ export default function BalanceSummaryBento({
                                 amount: item.amount
                               })
                             }
-                            className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition-colors cursor-pointer"
+                            className="px-2.5 py-1.5 min-h-[36px] bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer"
                           >
                             Trả
                           </button>
@@ -235,7 +236,7 @@ export default function BalanceSummaryBento({
       </div>
 
       {/* BOTTOM ROW: Bảng số dư chi tiết từng thành viên */}
-      <div className="glass-card rounded-3xl p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card">
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 dark:border-zinc-800 shadow-card">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />

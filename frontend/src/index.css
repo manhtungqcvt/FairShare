@@ -3,9 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    @apply min-h-screen w-full overflow-x-hidden;
+  }
   body {
     @apply bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -26,6 +30,11 @@
 .num-vnd {
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
+}
+
+/* Mobile Safe Area Padding */
+.safe-area-pb {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Custom scrollbars */
