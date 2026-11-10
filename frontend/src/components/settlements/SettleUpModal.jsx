@@ -4,7 +4,17 @@ import { useToast } from '../../context/ToastContext';
 import { formatVND } from '../../utils/format';
 import Button from '../common/Button';
 import Input from '../common/Input';
-import { X, HandCoins, ArrowRight, DollarSign, Calendar, FileText } from 'lucide-react';
+import {
+  X,
+  HandCoins,
+  ArrowRight,
+  DollarSign,
+  Calendar,
+  FileText,
+  ShieldCheck,
+  Clock,
+  Info
+} from 'lucide-react';
 
 export default function SettleUpModal({
   isOpen,
@@ -35,12 +45,15 @@ export default function SettleUpModal({
         const otherMember = group.members.find((m) => m.user._id !== currentUser?._id);
         setPayee(otherMember ? otherMember.user._id : group.members[0].user._id);
       }
+      setErrorMsg('');
     }
   }, [group, currentUser, prefill, isOpen]);
 
   if (!isOpen || !group) return null;
 
-  const parsedAmount = Number(amount) || 0;
+  const parsedAmount = Math.round(Number(amount)) || 0;
+  const isCreatorPayee = currentUser?._id === payee;
+  const isCreatorPayer = currentUser?._id === payer;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +70,7 @@ export default function SettleUpModal({
     }
 
     if (parsedAmount <= 0) {
-      setErrorMsg('Số tiền thanh toán phải lớn hơn 0');
+      setErrorMsg('Số tiền thanh toán phải là số nguyên dương lớn hơn 0');
       return;
     }
 
@@ -73,7 +86,12 @@ export default function SettleUpModal({
       });
 
       if (res.data.success) {
-        showToast('Ghi nhận thanh toán quyết toán thành công! Công nợ đã được trừ.', 'success');
+        const isConfirmed = res.data.settlement?.status === 'CONFIRMED';
+        if (isConfirmed) {
+          showToast('Đã xác nhận thanh toán công nợ thành công! Số dư đã được cấn trừ.', 'success');
+        } else {
+          showToast('Đã gửi yêu cầu thanh toán! Đang chờ người nhận xác nhận.', 'info');
+        }
         onClose();
         if (onSettlementCreated) onSettlementCreated(res.data.settlement);
       }
@@ -109,7 +127,7 @@ export default function SettleUpModal({
           <div>
             <h3 className="text-xl font-bold text-slate-900">Trả tiền ngay (Settle Up)</h3>
             <p className="text-xs text-slate-500">
-              Ghi nhận khoản thanh toán chuyển khoản giữa 2 thành viên
+              Ghi nhận thanh toán chuyển khoản & xác thực 2 chiều
             </p>
           </div>
         </div>
@@ -167,7 +185,7 @@ export default function SettleUpModal({
               <select
                 value={payer}
                 onChange={(e) => setPayer(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 font-medium"
+                className="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 font-medium cursor-pointer"
               >
                 {group.members?.map((m) => (
                   <option key={m.user._id} value={m.user._id}>
@@ -184,7 +202,7 @@ export default function SettleUpModal({
               <select
                 value={payee}
                 onChange={(e) => setPayee(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 font-medium"
+                className="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 font-medium cursor-pointer"
               >
                 {group.members?.map((m) => (
                   <option key={m.user._id} value={m.user._id}>
@@ -202,8 +220,8 @@ export default function SettleUpModal({
             <div className="relative rounded-xl shadow-sm">
               <input
                 type="number"
-                min="1000"
-                step="1000"
+                min="1"
+                step="1"
                 placeholder="100000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -239,6 +257,25 @@ export default function SettleUpModal({
             </div>
           </div>
 
+          {/* 2-way confirmation notice */}
+          <div className="p-3 rounded-2xl border text-xs bg-slate-50 border-slate-200 space-y-1">
+            {isCreatorPayee ? (
+              <p className="text-emerald-800 font-medium flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>
+                  Bạn là người nhận tiền: Giao dịch sẽ được <strong>xác nhận ngay lập tức</strong> và cấn trừ công nợ.
+                </span>
+              </p>
+            ) : (
+              <p className="text-amber-800 font-medium flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span>
+                  Bạn đang tạo giao dịch: Trạng thái sẽ là <strong>Chờ xác nhận</strong> cho đến khi người nhận bấm duyệt.
+                </span>
+              </p>
+            )}
+          </div>
+
           <div className="flex items-center justify-end gap-3 pt-3">
             <Button
               type="button"
@@ -254,7 +291,7 @@ export default function SettleUpModal({
               loading={loading}
               icon={HandCoins}
             >
-              Xác nhận trả tiền
+              Gửi yêu cầu thanh toán
             </Button>
           </div>
         </form>

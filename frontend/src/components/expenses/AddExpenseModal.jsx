@@ -14,7 +14,10 @@ import {
   Percent,
   Calculator,
   Check,
-  AlertCircle
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Sparkles
 } from 'lucide-react';
 
 const CATEGORIES = ['Ăn uống', 'Điện nước', 'Tiền nhà', 'Đồ gia dụng', 'Khác'];
@@ -36,11 +39,8 @@ export default function AddExpenseModal({
   const [splitType, setSplitType] = useState('EQUAL'); // 'EQUAL' | 'PERCENTAGE' | 'EXACT'
 
   // State cho từng chế độ chia
-  // EQUAL: set các userId được chọn
   const [selectedUserIds, setSelectedUserIds] = useState([]);
-  // PERCENTAGE: { [userId]: number }
   const [percentages, setPercentages] = useState({});
-  // EXACT: { [userId]: number }
   const [exactAmounts, setExactAmounts] = useState({});
 
   const [loading, setLoading] = useState(false);
@@ -52,10 +52,9 @@ export default function AddExpenseModal({
       const allIds = group.members.map((m) => m.user._id);
       setSelectedUserIds(allIds);
 
-      // Mặc định người trả là currentUser hoặc người đầu tiên
       setPaidBy(currentUser?._id || group.members[0].user._id);
 
-      // Mặc định chia đều phần trăm
+      // Chia đều % ban đầu khớp đúng 100%
       const initialPct = {};
       const basePct = Math.floor(100 / allIds.length);
       const remPct = 100 - basePct * allIds.length;
@@ -64,14 +63,14 @@ export default function AddExpenseModal({
       });
       setPercentages(initialPct);
 
-      // Mặc định exact
       setExactAmounts({});
+      setErrorMsg('');
     }
   }, [group, currentUser, isOpen]);
 
   if (!isOpen || !group) return null;
 
-  const parsedAmount = Number(amount) || 0;
+  const parsedAmount = Math.round(Number(amount)) || 0;
 
   // Xử lý chuyển đổi chọn người trong EQUAL
   const toggleUserEqual = (userId) => {
@@ -87,81 +86,145 @@ export default function AddExpenseModal({
     setErrorMsg('');
   };
 
-  // Tính toán Preview phân bổ trực tiếp
+  // Tính toán Preview phân bổ & phần dư chuẩn xác
   const calculateLivePreview = () => {
-    if (parsedAmount <= 0) return [];
+    if (parsedAmount <= 0) return { splits: [], remainder: 0, firstUserId: null };
 
     if (splitType === 'EQUAL') {
       const count = selectedUserIds.length;
-      if (count === 0) return [];
+      if (count === 0) return { splits: [], remainder: 0, firstUserId: null };
       const base = Math.floor(parsedAmount / count);
-      const rem = parsedAmount - base * count;
+      const remainder = parsedAmount - base * count;
+      const firstUserId = selectedUserIds[0];
 
-      return group.members.map((m) => {
+      const splits = group.members.map((m) => {
         const uId = m.user._id;
         const isSelected = selectedUserIds.includes(uId);
         if (!isSelected) {
           return { user: m.user, amountOwed: 0, percentage: 0, isIncluded: false };
         }
-        const idx = selectedUserIds.indexOf(uId);
-        const owed = base + (idx < rem ? 1 : 0);
+        const isFirst = uId === firstUserId;
+        const owed = base + (isFirst ? remainder : 0);
         const pct = ((owed / parsedAmount) * 100).toFixed(1);
-        return { user: m.user, amountOwed: owed, percentage: pct, isIncluded: true };
+        return {
+          user: m.user,
+          amountOwed: owed,
+          percentage: pct,
+          isIncluded: true,
+          hasRemainder: isFirst && remainder > 0
+        };
       });
+
+      return { splits, remainder, firstUserId };
     }
 
     if (splitType === 'PERCENTAGE') {
       let allocated = 0;
-      const validMembers = group.members.filter((m) => percentages[m.user._id] > 0);
+      const membersWithPct = group.members.filter((m) => Number(percentages[m.user._id]) > 0);
+      const firstUserId = membersWithPct.length > 0 ? membersWithPct[0].user._id : null;
 
-      return group.members.map((m, idx) => {
+      // Tính floor cho từng người
+      let sumFloor = 0;
+      const preliminary = group.members.map((m) => {
         const pct = Number(percentages[m.user._id]) || 0;
-        let owed = Math.round((pct / 100) * parsedAmount);
-        if (idx === group.members.length - 1 && validMembers.length > 0) {
-          owed = parsedAmount - allocated;
-        } else {
-          allocated += owed;
-        }
+        const owed = Math.floor((pct / 100) * parsedAmount);
+        sumFloor += owed;
         return { user: m.user, amountOwed: owed, percentage: pct, isIncluded: pct > 0 };
       });
+
+      const remainder = parsedAmount - sumFloor;
+
+      const splits = preliminary.map((item) => {
+        const isFirst = item.user._id === firstUserId;
+        const owed = item.amountOwed + (isFirst ? remainder : 0);
+        return {
+          ...item,
+          amountOwed: owed,
+          hasRemainder: isFirst && remainder > 0
+        };
+      });
+
+      return { splits, remainder, firstUserId };
     }
 
     if (splitType === 'EXACT') {
-      return group.members.map((m) => {
-        const owed = Number(exactAmounts[m.user._id]) || 0;
+      const splits = group.members.map((m) => {
+        const owed = Math.round(Number(exactAmounts[m.user._id]) || 0);
         const pct = parsedAmount > 0 ? ((owed / parsedAmount) * 100).toFixed(1) : 0;
         return { user: m.user, amountOwed: owed, percentage: pct, isIncluded: owed > 0 };
       });
+      return { splits, remainder: 0, firstUserId: null };
     }
 
-    return [];
+    return { splits: [], remainder: 0, firstUserId: null };
   };
 
-  const liveSplits = calculateLivePreview();
+  const { splits: liveSplits, remainder, firstUserId } = calculateLivePreview();
 
   // Kiểm tra tổng phần trăm
-  const totalPercentage = Object.values(percentages).reduce(
-    (sum, val) => sum + (Number(val) || 0),
-    0
+  const totalPercentage = Number(
+    Object.values(percentages)
+      .reduce((sum, val) => sum + (Number(val) || 0), 0)
+      .toFixed(2)
   );
 
   // Kiểm tra tổng tiền exact
   const totalExact = Object.values(exactAmounts).reduce(
-    (sum, val) => sum + (Number(val) || 0),
+    (sum, val) => sum + Math.round(Number(val) || 0),
     0
   );
+
+  // KIỂM TRA ĐIỀU KIỆN MỞ KHÓA NÚT SUBMIT CHẶT CHẼ
+  let isSplitValid = false;
+  let splitValidationMessage = '';
+  let splitValidationStatus = 'INVALID'; // 'VALID' | 'MISSING' | 'EXCESS'
+
+  if (parsedAmount > 0) {
+    if (splitType === 'EQUAL') {
+      if (selectedUserIds.length > 0) {
+        isSplitValid = true;
+        splitValidationStatus = 'VALID';
+        splitValidationMessage = 'Đã khớp 100%';
+      } else {
+        splitValidationMessage = 'Chưa chọn thành viên nào';
+      }
+    } else if (splitType === 'PERCENTAGE') {
+      const diff = 100 - totalPercentage;
+      if (Math.abs(diff) < 0.001) {
+        isSplitValid = true;
+        splitValidationStatus = 'VALID';
+        splitValidationMessage = 'Đã khớp 100%';
+      } else if (diff > 0) {
+        splitValidationStatus = 'MISSING';
+        splitValidationMessage = `Còn thiếu ${diff.toFixed(1)}%`;
+      } else {
+        splitValidationStatus = 'EXCESS';
+        splitValidationMessage = `Vượt quá ${Math.abs(diff).toFixed(1)}%`;
+      }
+    } else if (splitType === 'EXACT') {
+      const diff = parsedAmount - totalExact;
+      if (diff === 0) {
+        isSplitValid = true;
+        splitValidationStatus = 'VALID';
+        splitValidationMessage = 'Đã khớp 100%';
+      } else if (diff > 0) {
+        splitValidationStatus = 'MISSING';
+        splitValidationMessage = `Còn thiếu ${formatVND(diff)}`;
+      } else {
+        splitValidationStatus = 'EXCESS';
+        splitValidationMessage = `Vượt quá ${formatVND(Math.abs(diff))}`;
+      }
+    }
+  }
+
+  const isFormValid = title.trim().length > 0 && parsedAmount > 0 && isSplitValid;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!title.trim()) {
-      setErrorMsg('Vui lòng nhập tên khoản chi');
-      return;
-    }
-
-    if (parsedAmount <= 0) {
-      setErrorMsg('Số tiền chi tiêu phải lớn hơn 0');
+    if (!isFormValid) {
+      setErrorMsg('Vui lòng hoàn thiện đúng thông tin và đảm bảo tổng tiền chia khớp 100%');
       return;
     }
 
@@ -169,32 +232,16 @@ export default function AddExpenseModal({
     let payloadSplits = [];
 
     if (splitType === 'EQUAL') {
-      if (selectedUserIds.length === 0) {
-        setErrorMsg('Vui lòng chọn ít nhất 1 người tham gia chia tiền');
-        return;
-      }
       payloadSplits = selectedUserIds.map((userId) => ({ user: userId }));
     } else if (splitType === 'PERCENTAGE') {
-      if (Math.abs(totalPercentage - 100) > 0.01) {
-        setErrorMsg(`Tổng phần trăm phải bằng 100% (Hiện tại là ${totalPercentage.toFixed(1)}%)`);
-        return;
-      }
       payloadSplits = group.members.map((m) => ({
         user: m.user._id,
         percentage: Number(percentages[m.user._id]) || 0
       }));
     } else if (splitType === 'EXACT') {
-      if (Math.abs(totalExact - parsedAmount) > 0.01) {
-        setErrorMsg(
-          `Tổng số tiền chia (${formatVND(totalExact)}) chưa bằng tổng số tiền chi (${formatVND(
-            parsedAmount
-          )}). Còn lệch ${formatVND(Math.abs(parsedAmount - totalExact))}`
-        );
-        return;
-      }
       payloadSplits = group.members.map((m) => ({
         user: m.user._id,
-        amountOwed: Number(exactAmounts[m.user._id]) || 0
+        amountOwed: Math.round(Number(exactAmounts[m.user._id]) || 0)
       }));
     }
 
@@ -224,6 +271,8 @@ export default function AddExpenseModal({
     }
   };
 
+  const firstUserObj = group.members.find((m) => m.user._id === firstUserId)?.user;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-150">
       <div
@@ -246,7 +295,7 @@ export default function AddExpenseModal({
           <div>
             <h3 className="text-xl font-bold text-slate-900">Thêm khoản chi tiêu mới</h3>
             <p className="text-xs text-slate-500">
-              Phòng: <strong className="text-slate-700">{group.name}</strong> • Tự động tính số dư gối đầu
+              Phòng: <strong className="text-slate-700">{group.name}</strong> • Khớp làm tròn số nguyên tuyệt đối
             </p>
           </div>
         </div>
@@ -279,8 +328,8 @@ export default function AddExpenseModal({
               <div className="relative rounded-xl shadow-sm">
                 <input
                   type="number"
-                  min="1000"
-                  step="1000"
+                  min="1"
+                  step="1"
                   placeholder="500000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
@@ -354,9 +403,9 @@ export default function AddExpenseModal({
             </div>
           </div>
 
-          {/* Row 4: CHẾ ĐỘ CHIA TIỀN (Split Mode Tabs) */}
+          {/* Row 4: CHẾ ĐỘ CHIA TIỀN (Split Mode Tabs & Smart Validation Status) */}
           <div className="pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <Calculator className="w-4 h-4 text-emerald-600" />
                 <span>Phương thức chia tiền</span>
@@ -400,12 +449,44 @@ export default function AddExpenseModal({
               </div>
             </div>
 
+            {/* BỘ ĐẾM SỐ TIỀN / PHẦN TRĂM THỜI GIAN THỰC (REAL-TIME SMART COUNTER) */}
+            <div className="mb-3 p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 text-xs bg-slate-50">
+              <span className="text-slate-600 font-medium">Trạng thái khớp phân bổ:</span>
+
+              <div className="flex items-center gap-2">
+                {splitValidationStatus === 'VALID' ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{splitValidationMessage}</span>
+                  </span>
+                ) : splitValidationStatus === 'MISSING' ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200 animate-pulse">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{splitValidationMessage}</span>
+                  </span>
+                ) : splitValidationStatus === 'EXCESS' ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 font-bold border border-rose-200 animate-pulse">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                    <span>{splitValidationMessage}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200 text-slate-600 font-semibold">
+                    <span>{parsedAmount > 0 ? 'Vui lòng kiểm tra phân bổ' : 'Nhập số tiền để đối soát'}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Split Content: EQUAL */}
             {splitType === 'EQUAL' && (
-              <div className="space-y-2 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
-                <p className="text-xs text-slate-500 mb-2">
-                  Tích chọn những người tham gia chia khoản này. Số tiền sẽ được tự động chia đều.
-                </p>
+              <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span>Tích chọn những người tham gia chia khoản này:</span>
+                  <span className="font-bold text-slate-700">
+                    Đã chọn {selectedUserIds.length}/{group.members?.length} người
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {group.members?.map((m) => {
                     const isSelected = selectedUserIds.includes(m.user._id);
@@ -440,14 +521,31 @@ export default function AddExpenseModal({
                           </span>
                         </div>
                         {isSelected && parsedAmount > 0 && (
-                          <span className="text-xs font-bold text-emerald-700 num-vnd">
-                            {formatVND(previewItem?.amountOwed || 0)}
-                          </span>
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-emerald-700 num-vnd block">
+                              {formatVND(previewItem?.amountOwed || 0)}
+                            </span>
+                            {previewItem?.hasRemainder && (
+                              <span className="text-[10px] text-amber-600 font-semibold">
+                                (+{formatVND(remainder)} dư)
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     );
                   })}
                 </div>
+
+                {/* Thông báo phần dư làm tròn */}
+                {remainder > 0 && firstUserObj && (
+                  <p className="text-[11px] text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                    <span>
+                      Phần dư lẻ <strong>{formatVND(remainder)}</strong> được tự động cộng vào <strong>{firstUserObj.name}</strong> để đảm bảo tổng khớp 100% không lệch 1 đồng.
+                    </span>
+                  </p>
+                )}
               </div>
             )}
 
@@ -458,14 +556,17 @@ export default function AddExpenseModal({
                   <span className="text-slate-500">Nhập tỷ lệ % cho từng thành viên:</span>
                   <span
                     className={`font-bold ${
-                      Math.abs(totalPercentage - 100) < 0.01
+                      Math.abs(totalPercentage - 100) < 0.001
                         ? 'text-emerald-600'
+                        : totalPercentage < 100
+                        ? 'text-amber-600'
                         : 'text-rose-600'
                     }`}
                   >
                     Tổng: {totalPercentage.toFixed(1)}% / 100%
                   </span>
                 </div>
+
                 <div className="space-y-2">
                   {group.members?.map((m) => {
                     const pctVal = percentages[m.user._id] ?? '';
@@ -487,25 +588,33 @@ export default function AddExpenseModal({
                         </div>
                         <div className="flex items-center gap-3">
                           {parsedAmount > 0 && (
-                            <span className="text-xs font-bold text-slate-600 num-vnd">
-                              {formatVND(previewItem?.amountOwed || 0)}
-                            </span>
+                            <div className="text-right">
+                              <span className="text-xs font-bold text-slate-700 num-vnd block">
+                                {formatVND(previewItem?.amountOwed || 0)}
+                              </span>
+                              {previewItem?.hasRemainder && (
+                                <span className="text-[10px] text-amber-600 font-semibold">
+                                  (+{formatVND(remainder)} dư)
+                                </span>
+                              )}
+                            </div>
                           )}
                           <div className="relative w-20">
                             <input
                               type="number"
                               min="0"
                               max="100"
+                              step="0.1"
                               value={pctVal}
                               onChange={(e) =>
                                 setPercentages({
                                   ...percentages,
-                                  [m.user._id]: Number(e.target.value)
+                                  [m.user._id]: e.target.value === '' ? '' : Number(e.target.value)
                                 })
                               }
                               className="w-full text-right text-xs font-bold py-1.5 pl-2 pr-6 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
                             />
-                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold">
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">
                               %
                             </span>
                           </div>
@@ -514,6 +623,15 @@ export default function AddExpenseModal({
                     );
                   })}
                 </div>
+
+                {remainder > 0 && firstUserObj && (
+                  <p className="text-[11px] text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                    <span>
+                      Phần dư lẻ <strong>{formatVND(remainder)}</strong> từ việc làm tròn được cộng vào <strong>{firstUserObj.name}</strong>.
+                    </span>
+                  </p>
+                )}
               </div>
             )}
 
@@ -524,14 +642,17 @@ export default function AddExpenseModal({
                   <span className="text-slate-500">Nhập số tiền chính xác từng người chịu:</span>
                   <span
                     className={`font-bold num-vnd ${
-                      Math.abs(totalExact - parsedAmount) < 0.01
+                      totalExact === parsedAmount && parsedAmount > 0
                         ? 'text-emerald-600'
+                        : totalExact < parsedAmount
+                        ? 'text-amber-600'
                         : 'text-rose-600'
                     }`}
                   >
                     Đã phân bổ: {formatVND(totalExact)} / {formatVND(parsedAmount)}
                   </span>
                 </div>
+
                 <div className="space-y-2">
                   {group.members?.map((m) => {
                     const exactVal = exactAmounts[m.user._id] ?? '';
@@ -559,12 +680,12 @@ export default function AddExpenseModal({
                             onChange={(e) =>
                               setExactAmounts({
                                 ...exactAmounts,
-                                [m.user._id]: Number(e.target.value)
+                                [m.user._id]: e.target.value === '' ? '' : Math.round(Number(e.target.value))
                               })
                             }
                             className="w-full text-right text-xs font-bold py-1.5 pl-2 pr-8 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 num-vnd"
                           />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold pointer-events-none">
                             ₫
                           </span>
                         </div>
@@ -576,23 +697,37 @@ export default function AddExpenseModal({
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={loading}
-            >
-              Thêm khoản chi
-            </Button>
+          {/* Form Actions with Strict Unlocking */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
+            <div className="text-xs text-slate-500">
+              {!isSplitValid && parsedAmount > 0 && (
+                <span className="text-amber-600 font-medium flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Nút xác nhận sẽ mở khóa khi tổng chia khớp 100%
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
+                disabled={!isFormValid || loading}
+                title={!isFormValid ? 'Vui lòng khớp 100% số tiền để tiếp tục' : 'Tạo khoản chi'}
+                className={!isFormValid ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+              >
+                Thêm khoản chi
+              </Button>
+            </div>
           </div>
         </form>
       </div>

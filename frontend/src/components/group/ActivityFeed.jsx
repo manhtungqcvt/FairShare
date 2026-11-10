@@ -1,0 +1,305 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
+import { formatDateTime, formatVND } from '../../utils/format';
+import {
+  History,
+  Receipt,
+  FileEdit,
+  Trash2,
+  HandCoins,
+  CheckCircle2,
+  XCircle,
+  UserPlus,
+  UserMinus,
+  Clock,
+  Filter,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+
+const ACTION_CONFIG = {
+  CREATE_EXPENSE: {
+    label: 'Thêm chi tiêu',
+    icon: Receipt,
+    color: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+  },
+  UPDATE_EXPENSE: {
+    label: 'Sửa chi tiêu',
+    icon: FileEdit,
+    color: 'bg-amber-50 text-amber-700 border-amber-200'
+  },
+  DELETE_EXPENSE: {
+    label: 'Xóa chi tiêu',
+    icon: Trash2,
+    color: 'bg-rose-50 text-rose-700 border-rose-200'
+  },
+  CREATE_SETTLEMENT: {
+    label: 'Tạo trả nợ',
+    icon: HandCoins,
+    color: 'bg-blue-50 text-blue-700 border-blue-200'
+  },
+  CONFIRM_SETTLEMENT: {
+    label: 'Xác nhận trả nợ',
+    icon: CheckCircle2,
+    color: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+  },
+  REJECT_SETTLEMENT: {
+    label: 'Từ chối trả nợ',
+    icon: XCircle,
+    color: 'bg-rose-50 text-rose-700 border-rose-200'
+  },
+  MEMBER_JOIN: {
+    label: 'Thành viên mới',
+    icon: UserPlus,
+    color: 'bg-violet-50 text-violet-700 border-violet-200'
+  },
+  MEMBER_LEAVE: {
+    label: 'Rời nhóm',
+    icon: UserMinus,
+    color: 'bg-slate-100 text-slate-700 border-slate-200'
+  }
+};
+
+export default function ActivityFeed({ groupId }) {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterAction, setFilterAction] = useState('ALL');
+  const [expandedLogId, setExpandedLogId] = useState(null);
+
+  const fetchActivities = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/groups/${groupId}/activities`);
+      if (res.data.success) {
+        setActivities(res.data.activities);
+      }
+    } catch (error) {
+      console.error('Lỗi tải nhật ký hoạt động:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (groupId) {
+      fetchActivities();
+    }
+  }, [groupId]);
+
+  const filteredLogs = activities.filter((act) => {
+    if (filterAction === 'ALL') return true;
+    if (filterAction === 'EXPENSE') {
+      return ['CREATE_EXPENSE', 'UPDATE_EXPENSE', 'DELETE_EXPENSE'].includes(act.action);
+    }
+    if (filterAction === 'SETTLEMENT') {
+      return ['CREATE_SETTLEMENT', 'CONFIRM_SETTLEMENT', 'REJECT_SETTLEMENT'].includes(act.action);
+    }
+    if (filterAction === 'MEMBER') {
+      return ['MEMBER_JOIN', 'MEMBER_LEAVE'].includes(act.action);
+    }
+    return act.action === filterAction;
+  });
+
+  return (
+    <div className="glass-card rounded-3xl p-6 border border-slate-200/90 shadow-card space-y-5 animate-in fade-in duration-150">
+      {/* Header & Filter Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <History className="w-5 h-5 text-emerald-600" />
+          <h4 className="text-base font-bold text-slate-900">
+            Nhật ký hoạt động & Lịch sử chỉnh sửa
+          </h4>
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+            {filteredLogs.length}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Action Filter Pills */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 text-xs">
+            <button
+              onClick={() => setFilterAction('ALL')}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                filterAction === 'ALL'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Tất cả
+            </button>
+            <button
+              onClick={() => setFilterAction('EXPENSE')}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                filterAction === 'EXPENSE'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Chi tiêu
+            </button>
+            <button
+              onClick={() => setFilterAction('SETTLEMENT')}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                filterAction === 'SETTLEMENT'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Trả nợ
+            </button>
+            <button
+              onClick={() => setFilterAction('MEMBER')}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                filterAction === 'MEMBER'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Thành viên
+            </button>
+          </div>
+
+          <button
+            onClick={fetchActivities}
+            disabled={loading}
+            title="Làm mới nhật ký"
+            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-emerald-700 transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Timeline items list */}
+      {loading ? (
+        <div className="py-12 flex flex-col items-center justify-center text-slate-400 space-y-2">
+          <RefreshCw className="w-6 h-6 animate-spin text-emerald-600" />
+          <p className="text-xs font-semibold">Đang tải nhật ký phòng...</p>
+        </div>
+      ) : filteredLogs.length > 0 ? (
+        <div className="space-y-3">
+          {filteredLogs.map((log) => {
+            const config = ACTION_CONFIG[log.action] || {
+              label: log.action,
+              icon: Clock,
+              color: 'bg-slate-100 text-slate-700 border-slate-200'
+            };
+            const Icon = config.icon;
+            const hasMetadata =
+              log.metadata &&
+              Object.keys(log.metadata).length > 0 &&
+              (log.metadata.old || log.metadata.new || log.metadata.reason);
+            const isExpanded = expandedLogId === log._id;
+
+            return (
+              <div
+                key={log._id}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 transition-all shadow-xs"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={log.actor?.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=FairShare'}
+                      alt={log.actor?.name}
+                      className="w-9 h-9 rounded-full bg-slate-100 object-cover ring-2 ring-slate-100 flex-shrink-0"
+                    />
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-slate-900">
+                          {log.actor?.name || 'Hệ thống'}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md border ${config.color}`}
+                        >
+                          <Icon className="w-3 h-3" />
+                          <span>{config.label}</span>
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                        {log.description}
+                      </p>
+
+                      <p className="text-[11px] text-slate-400">
+                        {formatDateTime(log.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Metadata dropdown toggle */}
+                  {hasMetadata && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedLogId(isExpanded ? null : log._id)}
+                      className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-emerald-700 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer flex-shrink-0"
+                    >
+                      <span>Đối chiếu</span>
+                      {isExpanded ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Metadata Inspection Panel */}
+                {hasMetadata && isExpanded && (
+                  <div className="mt-3 pt-3 border-t border-slate-100 bg-slate-50/80 -mx-3.5 -mb-3.5 sm:-mx-4 sm:-mb-4 p-3.5 sm:p-4 rounded-b-2xl text-xs space-y-2 animate-in fade-in duration-150">
+                    <p className="font-bold text-slate-600 uppercase text-[10px] tracking-wider">
+                      Chi tiết thay đổi / Đối chiếu dữ liệu:
+                    </p>
+
+                    {log.metadata.old && log.metadata.new && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="p-2.5 rounded-xl bg-white border border-rose-200">
+                          <span className="text-[10px] font-bold text-rose-600 block uppercase">
+                            Giá trị trước khi sửa:
+                          </span>
+                          <p className="font-semibold text-slate-800">{log.metadata.old.title}</p>
+                          <p className="font-extrabold text-slate-900 num-vnd">
+                            {formatVND(log.metadata.old.amount)}
+                          </p>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-white border border-emerald-200">
+                          <span className="text-[10px] font-bold text-emerald-600 block uppercase">
+                            Giá trị sau khi sửa:
+                          </span>
+                          <p className="font-semibold text-slate-800">{log.metadata.new.title}</p>
+                          <p className="font-extrabold text-slate-900 num-vnd">
+                            {formatVND(log.metadata.new.amount)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {log.metadata.reason && (
+                      <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                        <span className="text-[10px] font-bold text-slate-500 block uppercase">
+                          Lý do ghi nhận:
+                        </span>
+                        <p className="text-slate-700 italic">{log.metadata.reason}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12 px-4">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-2">
+            <History className="w-6 h-6" />
+          </div>
+          <p className="text-sm font-bold text-slate-800">Chưa có nhật ký hoạt động nào</p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Mọi thao tác tạo, sửa, xóa chi tiêu hoặc xác nhận trả nợ sẽ được lưu lại minh bạch tại đây.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

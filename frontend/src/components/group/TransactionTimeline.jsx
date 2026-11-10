@@ -11,7 +11,11 @@ import {
   Calendar,
   Tag,
   ArrowRight,
-  Filter
+  Filter,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function TransactionTimeline({
@@ -59,7 +63,7 @@ export default function TransactionTimeline({
   });
 
   return (
-    <div className="glass-card rounded-3xl p-6 border border-slate-200/90 shadow-card space-y-5">
+    <div className="glass-card rounded-3xl p-6 border border-slate-200/90 shadow-card space-y-5 animate-in fade-in duration-150">
       {/* Timeline Header & Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-2">
@@ -113,9 +117,12 @@ export default function TransactionTimeline({
           {filteredHistory.map((item) => {
             const isExpense = item.itemType === 'EXPENSE';
             const isExpanded = expandedId === item._id;
+
+            // Quyền xóa: Admin, người tạo hoặc người trả tiền (theo Rule 3)
             const canDelete =
               isAdmin ||
-              (isExpense && item.createdBy?._id === currentUser?._id) ||
+              (isExpense &&
+                (item.createdBy?._id === currentUser?._id || item.paidBy?._id === currentUser?._id)) ||
               (!isExpense &&
                 (item.payer?._id === currentUser?._id || item.payee?._id === currentUser?._id));
 
@@ -126,7 +133,11 @@ export default function TransactionTimeline({
                 className={`p-4 rounded-2xl border transition-all duration-200 ${
                   isExpense
                     ? 'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-sm cursor-pointer'
-                    : 'bg-emerald-50/50 border-emerald-100'
+                    : item.status === 'CONFIRMED'
+                    ? 'bg-emerald-50/40 border-emerald-200/80'
+                    : item.status === 'REJECTED'
+                    ? 'bg-rose-50/30 border-rose-200/60 opacity-80'
+                    : 'bg-amber-50/40 border-amber-200/70'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -136,13 +147,21 @@ export default function TransactionTimeline({
                       className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
                         isExpense
                           ? 'bg-slate-100 text-slate-700'
-                          : 'bg-emerald-100 text-emerald-700'
+                          : item.status === 'CONFIRMED'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : item.status === 'REJECTED'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-amber-100 text-amber-700'
                       }`}
                     >
                       {isExpense ? (
                         <Receipt className="w-5 h-5" />
+                      ) : item.status === 'CONFIRMED' ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : item.status === 'REJECTED' ? (
+                        <XCircle className="w-5 h-5" />
                       ) : (
-                        <HandCoins className="w-5 h-5" />
+                        <Clock className="w-5 h-5" />
                       )}
                     </div>
 
@@ -152,20 +171,39 @@ export default function TransactionTimeline({
                         <h5 className="text-sm font-bold text-slate-900">
                           {item.title}
                         </h5>
+
                         {isExpense && item.category && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                             {item.category}
                           </span>
                         )}
+
                         {!isExpense && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                            Quyết toán nợ
-                          </span>
+                          <>
+                            {item.status === 'CONFIRMED' && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>Đã tất toán</span>
+                              </span>
+                            )}
+                            {item.status === 'PENDING' && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-amber-600" />
+                                <span>Chờ xác nhận</span>
+                              </span>
+                            )}
+                            {item.status === 'REJECTED' && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1">
+                                <XCircle className="w-3 h-3 text-rose-600" />
+                                <span>Từ chối</span>
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
 
                       {/* Subtitle: Who paid for whom */}
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-slate-600 mt-1">
                         {isExpense ? (
                           <>
                             <strong>{item.paidBy?.name}</strong> đã trả trước{' '}
@@ -176,7 +214,7 @@ export default function TransactionTimeline({
                             <strong>{item.payer?.name}</strong>
                             <ArrowRight className="w-3 h-3 text-slate-400" />
                             <strong>{item.payee?.name}</strong>
-                            {item.note && <span className="text-slate-400">({item.note})</span>}
+                            {item.note && <span className="text-slate-500 italic">({item.note})</span>}
                           </span>
                         )}
                       </p>
@@ -192,7 +230,13 @@ export default function TransactionTimeline({
                     <div>
                       <span
                         className={`text-base font-extrabold num-vnd block ${
-                          isExpense ? 'text-slate-900' : 'text-emerald-700'
+                          isExpense
+                            ? 'text-slate-900'
+                            : item.status === 'CONFIRMED'
+                            ? 'text-emerald-700'
+                            : item.status === 'REJECTED'
+                            ? 'text-rose-600 line-through'
+                            : 'text-amber-700'
                         }`}
                       >
                         {formatVND(item.amount)}
