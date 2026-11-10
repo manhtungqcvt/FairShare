@@ -1,21 +1,40 @@
 /**
  * FairShare Core Business Logic: Debt & Balance Calculator
+ * Strict VND Integer Accounting & Settlement Verification
  */
 
 /**
- * 1. Chia tiền linh hoạt (Flexible Split)
- * @param {number} amount - Tổng số tiền
+ * 1. Chia tiền linh hoạt & làm tròn số nguyên tuyệt đối (Strict Currency Splitting)
+ * @param {number} amount - Tổng số tiền (số nguyên dương VNĐ)
  * @param {string} splitType - 'EQUAL' | 'PERCENTAGE' | 'EXACT'
  * @param {Array} rawSplits - Danh sách chi tiết phân bổ: [{ user, percentage, amountOwed }]
  * @returns {Array} [{ user, amountOwed, percentage }]
  */
 function calculateSplits(amount, splitType, rawSplits) {
-  if (!amount || amount <= 0) {
-    throw new Error('Số tiền phải lớn hơn 0');
+  const integerAmount = Math.round(Number(amount));
+  if (!integerAmount || integerAmount <= 0) {
+    throw new Error('Số tiền phải là số nguyên dương lớn hơn 0');
   }
 
   if (!Array.isArray(rawSplits) || rawSplits.length === 0) {
-    throw new Error('Danh sách thành viên chia tiền không được để trống');
+    throw new Error('Danh sách thành viên chia tiền phải có ít nhất 1 người');
+  }
+
+  // Kiểm tra không được trùng lặp userId
+  const seenUsers = new Set();
+  for (const item of rawSplits) {
+    const userIdStr = (item.user && item.user._id)
+      ? item.user._id.toString()
+      : (item.user ? item.user.toString() : '');
+
+    if (!userIdStr) {
+      throw new Error('Thông tin người tham gia chia tiền không hợp lệ');
+    }
+
+    if (seenUsers.has(userIdStr)) {
+      throw new Error('Danh sách chia tiền không được trùng lặp thành viên');
+    }
+    seenUsers.add(userIdStr);
   }
 
   const numPeople = rawSplits.length;
@@ -23,61 +42,68 @@ function calculateSplits(amount, splitType, rawSplits) {
 
   switch (splitType) {
     case 'EQUAL': {
-      // Chia đều cho N người, xử lý phần dư làm tròn đến đơn vị đồng
-      const baseAmount = Math.floor(amount / numPeople);
-      let remainder = Math.round(amount - baseAmount * numPeople);
+      // Khi chia đều cho N thành viên: sử dụng Math.floor() cho từng người
+      const baseFloor = Math.floor(integerAmount / numPeople);
+      splits = rawSplits.map(item => ({
+        user: item.user._id ? item.user._id : item.user,
+        amountOwed: baseFloor,
+        percentage: Number(((baseFloor / integerAmount) * 100).toFixed(2))
+      }));
 
-      splits = rawSplits.map((item, index) => {
-        const extra = index < remainder ? 1 : 0;
-        const amountOwed = baseAmount + extra;
-        const percentage = Number(((amountOwed / amount) * 100).toFixed(2));
-        return {
-          user: item.user._id ? item.user._id : item.user,
-          amountOwed,
-          percentage
-        };
-      });
+      // Tính phần dư: remainder = amount - sum(amountOwed)
+      const currentSum = baseFloor * numPeople;
+      const remainder = integerAmount - currentSum;
+
+      // Nếu remainder !== 0, cộng phần dư đó vào người đầu tiên trong mảng splits
+      if (remainder !== 0 && splits.length > 0) {
+        splits[0].amountOwed += remainder;
+        splits[0].percentage = Number(((splits[0].amountOwed / integerAmount) * 100).toFixed(2));
+      }
       break;
     }
 
     case 'PERCENTAGE': {
-      // Tổng phần trăm phải xấp xỉ 100%
+      // Với PERCENTAGE: Tổng percentage phải bằng đúng 100
       const totalPercentage = rawSplits.reduce((acc, curr) => acc + Number(curr.percentage || 0), 0);
-      if (Math.abs(totalPercentage - 100) > 0.01) {
-        throw new Error(`Tổng phần trăm phải bằng 100% (Hiện tại là ${totalPercentage.toFixed(1)}%)`);
+      if (Math.abs(totalPercentage - 100) > 0.001) {
+        throw new Error(`Tổng phần trăm phải bằng đúng 100% (Hiện tại là ${Number(totalPercentage.toFixed(2))}%)`);
       }
 
-      let currentAllocated = 0;
-      splits = rawSplits.map((item, index) => {
-        const pct = Number(item.percentage);
-        let itemAmount = Math.round((pct / 100) * amount);
-
-        // Điều chỉnh sai số làm tròn cho người cuối cùng
-        if (index === numPeople - 1) {
-          itemAmount = amount - currentAllocated;
-        } else {
-          currentAllocated += itemAmount;
-        }
-
+      // Mỗi người dùng Math.floor()
+      let allocatedSum = 0;
+      splits = rawSplits.map(item => {
+        const pct = Number(item.percentage || 0);
+        const itemAmount = Math.floor((pct / 100) * integerAmount);
+        allocatedSum += itemAmount;
         return {
           user: item.user._id ? item.user._id : item.user,
           amountOwed: itemAmount,
           percentage: pct
         };
       });
+
+      // remainder = amount - sum(amountOwed)
+      const remainder = integerAmount - allocatedSum;
+      // Nếu remainder !== 0, cộng phần remainder đó vào người đầu tiên trong mảng splits
+      if (remainder !== 0 && splits.length > 0) {
+        splits[0].amountOwed += remainder;
+      }
       break;
     }
 
     case 'EXACT': {
-      // Tổng số tiền cụ thể phải bằng đúng số tiền chi tiêu
-      const totalExact = rawSplits.reduce((acc, curr) => acc + Number(curr.amountOwed || 0), 0);
-      if (Math.abs(totalExact - amount) > 0.01) {
-        throw new Error(`Tổng số tiền các thành viên (${totalExact.toLocaleString('vi-VN')}₫) phải khớp với tổng chi (${amount.toLocaleString('vi-VN')}₫)`);
+      // Với EXACT: Tổng amountOwed truyền lên phải bằng đúng amount
+      const totalExact = rawSplits.reduce((acc, curr) => acc + Math.round(Number(curr.amountOwed || 0)), 0);
+      if (totalExact !== integerAmount) {
+        throw new Error(`Tổng số tiền các thành viên (${totalExact.toLocaleString('vi-VN')}₫) phải bằng đúng tổng chi (${integerAmount.toLocaleString('vi-VN')}₫)`);
       }
 
       splits = rawSplits.map(item => {
-        const owed = Number(item.amountOwed);
-        const pct = Number(((owed / amount) * 100).toFixed(2));
+        const owed = Math.round(Number(item.amountOwed));
+        if (owed < 0) {
+          throw new Error('Số tiền chia cho từng người không được là số âm');
+        }
+        const pct = Number(((owed / integerAmount) * 100).toFixed(2));
         return {
           user: item.user._id ? item.user._id : item.user,
           amountOwed: owed,
@@ -91,32 +117,42 @@ function calculateSplits(amount, splitType, rawSplits) {
       throw new Error(`Kiểu chia tiền '${splitType}' không hợp lệ`);
   }
 
+  // Đảm bảo tổng splits.amountOwed === expense.amount tuyệt đối 100%
+  const totalVerified = splits.reduce((acc, curr) => acc + curr.amountOwed, 0);
+  if (totalVerified !== integerAmount) {
+    throw new Error(`Lỗi khớp số liệu: Tổng các phần chia (${totalVerified}) không bằng tổng tiền (${integerAmount})`);
+  }
+
   return splits;
 }
 
 /**
  * 2. Tính số dư gối đầu liên tục (Rolling Net Balance)
+ * QUAN TRỌNG: Chỉ tính các khoản Settlement có status === 'CONFIRMED'
  * @param {Array} members - Danh sách thành viên trong nhóm
  * @param {Array} expenses - Lịch sử các khoản chi
  * @param {Array} settlements - Lịch sử các lần quyết toán/trả nợ
  * @returns {Object} { [userId]: netBalance }
- * Dương (>0): Được nhận lại tiền từ nhóm (chủ nợ)
- * Âm (<0): Đang nợ nhóm tiền (người nợ)
- * Bằng 0: Đã cân bằng
  */
 function calculateRollingNetBalance(members = [], expenses = [], settlements = []) {
   const netBalances = {};
 
   // Khởi tạo số dư ban đầu 0 cho tất cả thành viên
   members.forEach(member => {
-    const userId = (member.user && member.user._id) ? member.user._id.toString() : (member._id ? member._id.toString() : member.toString());
-    netBalances[userId] = 0;
+    const userId = (member.user && member.user._id)
+      ? member.user._id.toString()
+      : (member._id ? member._id.toString() : member.toString());
+    if (userId) {
+      netBalances[userId] = 0;
+    }
   });
 
   // 1. Duyệt qua tất cả các khoản chi tiêu (Expenses)
   expenses.forEach(expense => {
-    const payerId = (expense.paidBy && expense.paidBy._id) ? expense.paidBy._id.toString() : expense.paidBy.toString();
-    const expenseAmount = Number(expense.amount) || 0;
+    const payerId = (expense.paidBy && expense.paidBy._id)
+      ? expense.paidBy._id.toString()
+      : expense.paidBy.toString();
+    const expenseAmount = Math.round(Number(expense.amount) || 0);
 
     // Người trả tiền tăng số dư (cộng thêm tổng tiền đã chi)
     netBalances[payerId] = (netBalances[payerId] || 0) + expenseAmount;
@@ -124,18 +160,29 @@ function calculateRollingNetBalance(members = [], expenses = [], settlements = [
     // Những người tham gia chia tiền bị trừ số dư (nợ phần của mình)
     if (Array.isArray(expense.splits)) {
       expense.splits.forEach(split => {
-        const splitUserId = (split.user && split.user._id) ? split.user._id.toString() : split.user.toString();
-        const owed = Number(split.amountOwed) || 0;
+        const splitUserId = (split.user && split.user._id)
+          ? split.user._id.toString()
+          : split.user.toString();
+        const owed = Math.round(Number(split.amountOwed) || 0);
         netBalances[splitUserId] = (netBalances[splitUserId] || 0) - owed;
       });
     }
   });
 
   // 2. Duyệt qua tất cả các khoản thanh toán/trả nợ (Settlements)
+  // Chỉ tính các khoản Settlement có status === 'CONFIRMED'
   settlements.forEach(settlement => {
-    const payerId = (settlement.payer && settlement.payer._id) ? settlement.payer._id.toString() : settlement.payer.toString();
-    const payeeId = (settlement.payee && settlement.payee._id) ? settlement.payee._id.toString() : settlement.payee.toString();
-    const settlementAmount = Number(settlement.amount) || 0;
+    if (settlement.status !== 'CONFIRMED') {
+      return; // Bỏ qua nếu PENDING hoặc REJECTED
+    }
+
+    const payerId = (settlement.payer && settlement.payer._id)
+      ? settlement.payer._id.toString()
+      : settlement.payer.toString();
+    const payeeId = (settlement.payee && settlement.payee._id)
+      ? settlement.payee._id.toString()
+      : settlement.payee.toString();
+    const settlementAmount = Math.round(Number(settlement.amount) || 0);
 
     // Payer trả nợ -> số dư tăng (giảm bớt số âm)
     netBalances[payerId] = (netBalances[payerId] || 0) + settlementAmount;
@@ -144,7 +191,7 @@ function calculateRollingNetBalance(members = [], expenses = [], settlements = [
     netBalances[payeeId] = (netBalances[payeeId] || 0) - settlementAmount;
   });
 
-  // Làm tròn số dư để tránh số thập phân do phép toán float
+  // Làm tròn số nguyên VNĐ tuyệt đối
   Object.keys(netBalances).forEach(userId => {
     netBalances[userId] = Math.round(netBalances[userId]);
   });
@@ -154,9 +201,8 @@ function calculateRollingNetBalance(members = [], expenses = [], settlements = [
 
 /**
  * 3. Tối giản hóa giao dịch nợ (Debt Simplification)
- * Khớp người nợ (số dư âm) với chủ nợ (số dư dương) để xuất ra danh sách chuyển khoản tối ưu.
  * @param {Object} netBalances - { [userId]: balance }
- * @param {Object} userMap - Bản đồ chi tiết thông tin user { [userId]: { name, avatar, email } }
+ * @param {Object} userMap - Bản đồ chi tiết thông tin user
  * @returns {Array} [{ from, to, amount, fromUser, toUser }]
  */
 function simplifyDebts(netBalances = {}, userMap = {}) {
@@ -164,10 +210,11 @@ function simplifyDebts(netBalances = {}, userMap = {}) {
   const creditors = []; // Những người cần nhận tiền (netBalance > 0)
 
   Object.entries(netBalances).forEach(([userId, balance]) => {
-    if (balance < -1) {
-      debtors.push({ user: userId, amount: -balance });
-    } else if (balance > 1) {
-      creditors.push({ user: userId, amount: balance });
+    const intBal = Math.round(balance);
+    if (intBal < 0) {
+      debtors.push({ user: userId, amount: -intBal });
+    } else if (intBal > 0) {
+      creditors.push({ user: userId, amount: intBal });
     }
   });
 

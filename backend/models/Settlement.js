@@ -27,6 +27,17 @@ const settlementSchema = new mongoose.Schema({
     trim: true,
     default: 'Thanh toán công nợ'
   },
+  status: {
+    type: String,
+    enum: ['PENDING', 'CONFIRMED', 'REJECTED'],
+    default: 'PENDING',
+    index: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: [true, 'Vui lòng xác định người tạo yêu cầu thanh toán']
+  },
   date: {
     type: Date,
     default: Date.now
