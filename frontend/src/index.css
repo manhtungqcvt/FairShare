@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Glassmorphism helpers */
+.glass-header {
+  @apply bg-white/80 backdrop-blur-md border-b border-slate-200/80;
+}
+
+.glass-card {
+  @apply bg-white/90 backdrop-blur-sm border border-slate-200/90 shadow-card;
+}
+
+.glass-modal {
+  @apply bg-white/95 backdrop-blur-md border border-slate-200 shadow-2xl;
+}
+
+/* Tabular figures for currency numbers */
+.num-vnd {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+}
