@@ -11,8 +11,13 @@ connectDB();
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Middlewares: Tự động cho phép mọi domain Vercel, CLIENT_URL và localhost không bị chặn CORS
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,10 +29,20 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Health check endpoint
+// Root test endpoint cho Render
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'FairShare Backend API is running smoothly.',
+    docs: '/api/health'
+  });
+});
+
+// Health check endpoint cho Render & Vercel
 app.get('/api/health', (req, res) => {
   res.status(200).json({
-    status: 'healthy',
+    status: 'ok',
+    health: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'FairShare API',
     version: '1.0.0'

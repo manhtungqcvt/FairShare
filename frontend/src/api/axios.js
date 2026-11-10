@@ -1,7 +1,22 @@
 import axios from 'axios';
 
+// Tự động nhận diện VITE_API_URL:
+// - Nếu có biến môi trường VITE_API_URL: tự động chuẩn hóa và thêm '/api' nếu chưa có
+// - Nếu không có (local dev proxy): fallback về '/api'
+const getBaseURL = () => {
+  let envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || envUrl.trim() === '') {
+    return '/api';
+  }
+  let cleanUrl = envUrl.trim().replace(/\/+$/, '');
+  if (!cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api`;
+  }
+  return cleanUrl;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json'
   }
