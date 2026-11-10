@@ -38,28 +38,28 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/30">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/30 dark:from-zinc-950 dark:via-zinc-900/60 dark:to-emerald-950/20 transition-colors duration-200">
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/25 mb-4 transform hover:scale-105 transition-transform">
             <Sparkles className="w-7 h-7 text-emerald-100" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Chào mừng đến với <span className="text-emerald-600">FairShare</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">
+            Chào mừng đến với <span className="text-emerald-600 dark:text-emerald-400">FairShare</span>
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
             Minh bạch chi tiêu & công nợ phòng trọ, nhóm bạn
           </p>
         </div>
 
         {/* Auth Card */}
-        <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-card border border-slate-200/80">
-          <h2 className="text-lg font-bold text-slate-900 mb-6">Đăng nhập tài khoản</h2>
+        <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-card border border-slate-200/80 dark:border-zinc-800">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-6">Đăng nhập tài khoản</h2>
 
           {errorMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-2.5 animate-in fade-in">
-              <span className="font-semibold text-rose-900 flex-shrink-0">Lỗi:</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm flex items-start gap-2.5 animate-in fade-in">
+              <span className="font-semibold text-rose-900 dark:text-rose-200 flex-shrink-0">Lỗi:</span>
               <span>{errorMsg}</span>
             </div>
           )}
@@ -89,7 +89,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  className="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -109,14 +109,14 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Quick Demo Info */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 space-y-1">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          {/* Quick Info Box */}
+          <div className="mt-6 pt-5 border-t border-slate-100 dark:border-zinc-800">
+            <div className="bg-slate-50 dark:bg-zinc-800/60 rounded-xl p-3 text-xs text-slate-600 dark:text-zinc-400 space-y-1 border border-slate-100 dark:border-zinc-700/60">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-zinc-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Bạn mới tham gia FairShare?</span>
               </div>
-              <p className="text-slate-500">
+              <p className="text-slate-500 dark:text-zinc-400">
                 Đăng ký tài khoản mới chỉ mất 10 giây để tạo hoặc tham gia phòng trọ của bạn!
               </p>
             </div>
@@ -124,11 +124,11 @@ export default function Login() {
         </div>
 
         {/* Footer Link */}
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-slate-600 dark:text-zinc-400">
           Chưa có tài khoản?{' '}
           <Link
             to="/register"
-            className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+            className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline cursor-pointer"
           >
             Đăng ký tài khoản mới
           </Link>

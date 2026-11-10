@@ -46,7 +46,7 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
       <div
         className="glass-modal w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -54,24 +54,24 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+          className="absolute top-5 right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Tạo phòng / Nhóm mới</h3>
-            <p className="text-xs text-slate-500">Mã mời 6 ký tự sẽ tự động được tạo để bạn chia sẻ cho bạn cùng phòng</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Tạo phòng / Nhóm mới</h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">Mã mời 6 ký tự sẽ tự động được tạo để bạn chia sẻ cho bạn cùng phòng</p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+          <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-medium">
             {errorMsg}
           </div>
         )}
@@ -97,8 +97,8 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
             icon={AlignLeft}
           />
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 text-xs text-slate-600 dark:text-zinc-400 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
             <span>
               Sau khi tạo nhóm, bạn sẽ nhận được <strong>Mã mời riêng biệt</strong>. Bạn cùng phòng chỉ cần nhập mã này là vào được ngay, không cần xét duyệt phức tạp.
             </span>

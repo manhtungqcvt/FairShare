@@ -45,38 +45,38 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
       <div
         className="glass-modal w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl relative animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+          className="absolute top-5 right-5 text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center">
             <KeyRound className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Nhập mã mời phòng</h3>
-            <p className="text-xs text-slate-500">Mã 6 ký tự do trưởng phòng hoặc bạn cùng phòng chia sẻ</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Nhập mã mời phòng</h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">Mã 6 ký tự do trưởng phòng hoặc bạn cùng phòng chia sẻ</p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+          <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-medium">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-              Mã mời (6 Ký tự) <span className="text-rose-500">*</span>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider mb-2">
+              Mã mời (6 Ký tự) <span className="text-rose-500 dark:text-rose-400">*</span>
             </label>
             <div className="relative">
               <input
@@ -86,16 +86,16 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
                 placeholder="VD: ABC123"
                 autoFocus
                 maxLength={6}
-                className="w-full text-center text-2xl font-mono font-bold tracking-widest py-3 px-4 rounded-2xl border-2 border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100 uppercase transition-all outline-none"
+                className="w-full text-center text-2xl font-mono font-bold tracking-widest py-3 px-4 rounded-2xl border-2 border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 placeholder:text-slate-300 dark:placeholder:text-zinc-600 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-4 focus:ring-teal-100 dark:focus:ring-teal-950/60 uppercase transition-all outline-none"
               />
             </div>
-            <p className="text-xs text-slate-400 text-center mt-2">
+            <p className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
               {inviteCode.length}/6 ký tự
             </p>
           </div>
 
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 text-xs text-slate-600">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/60 text-xs text-slate-600 dark:text-zinc-400 border border-slate-100 dark:border-zinc-700/60">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             <span>Bạn sẽ ngay lập tức xem được công nợ và lịch sử chi tiêu sau khi tham gia.</span>
           </div>
 
